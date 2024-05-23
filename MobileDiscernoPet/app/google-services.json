@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1058425408406",
+    "project_id": "mobilediscernopet",
+    "storage_bucket": "mobilediscernopet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058425408406:android:7b518c305e781368016bb7",
+        "android_client_info": {
+          "package_name": "com.example.mobilediscernopet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVNBewe5KsSrd17yKYqO-02PuCLDmwzh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
