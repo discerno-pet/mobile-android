@@ -3,7 +3,6 @@ package com.example.mobilediscernopet
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mobilediscernopet.databinding.ActivitySignInBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -20,6 +19,8 @@ class SignInActivity : AppCompatActivity() {
 
     /**
      * Método chamado quando a Activity é criada.
+     * Inicializa a autenticação Firebase, bindings e configura listeners para os botões.
+     * @param savedInstanceState Estado salvo da instância anterior da Activity.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,76 +29,83 @@ class SignInActivity : AppCompatActivity() {
 
         auth = Firebase.auth
 
-        // Configura listeners para os botões
-        binding.textView.setOnClickListener { navigateToSignUp() }
+        binding.textView.setOnClickListener { navigateToActivity(SignUpActivity::class.java) }
         binding.button.setOnClickListener { signInUser() }
     }
 
     /**
      * Método chamado quando a Activity está prestes a se tornar visível.
+     * Verifica se o usuário já está logado e, em caso afirmativo, navega para a MainActivity.
      */
     override fun onStart() {
         super.onStart()
-        // Se o usuário já estiver logado, navega para a MainActivity
         if (auth.currentUser != null) {
-            navigateToMain()
+            navigateToActivity(MainActivity::class.java)
         }
     }
 
     /**
      * Realiza o login do usuário com email e senha.
+     * Obtém o email e senha dos campos de texto, valida as credenciais e, se válidas,
+     * tenta autenticar o usuário com o Firebase Authentication.
+     * Em caso de sucesso, navega para a MainActivity. Caso contrário, exibe uma mensagem de erro.
      */
     private fun signInUser() {
         val email = binding.emailEt.text.toString()
         val password = binding.passET.text.toString()
 
-        // Valida email e senha
-        if (!isValidEmail(email)) {
-            Toast.makeText(this, "Email inválido.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (password.isEmpty()) {
-            Toast.makeText(this, "Senha obrigatória.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Tenta realizar o login
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    navigateToMain()
-                } else {
-                    // Exibe mensagem de erro em caso de falha no login
-                    Toast.makeText(
-                        baseContext, "Falha no login: ${task.exception?.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+        if (areCredentialsValid(email, password)) {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        navigateToActivity(MainActivity::class.java)
+                    } else {
+                        showError("Usuário ou senha incorretos")
+                    }
                 }
-            }
+        }
     }
 
     /**
-     * Navega para a MainActivity.
+     * Valida se as credenciais fornecidas (email e senha) são válidas.
+     * @param email Endereço de email a ser validado.
+     * @param password Senha a ser validada.
+     * @return `true` se as credenciais forem válidas, `false` caso contrário.
      */
-    private fun navigateToMain() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish() // Impede o usuário de voltar para a tela de login após o login
+    private fun areCredentialsValid(email: String, password: String): Boolean {
+        when {
+            email.isEmpty() && password.isEmpty() -> showError("Email e senha obrigatórios")
+            email.isEmpty() -> showError("Email obrigatório")
+            password.isEmpty() -> showError("Senha obrigatória")
+            !isValidEmail(email) -> showError("Email inválido")
+            else -> return true
+        }
+        return false
     }
 
     /**
-     * Navega para a SignUpActivity.
+     * Exibe uma mensagem de erro na tela.
+     * @param message Mensagem de erro a ser exibida.
      */
-    private fun navigateToSignUp() {
-        val intent = Intent(this, SignUpActivity::class.java)
-        startActivity(intent)
+    private fun showError(message: String) {
+        binding.errorTextView.text = message
+        binding.errorTextView.setTextColor(resources.getColor(R.color.red, null))
     }
 
     /**
-     * Verifica se o email fornecido é válido.
-     *
+     * Navega para a Activity especificada.
+     * @param activityClass Classe da Activity de destino.
+     */
+    private fun navigateToActivity(activityClass: Class<*>) {
+        val intent = Intent(this, activityClass)
+        startActivity(intent)
+        finish()
+    }
+
+    /**
+     * Verifica se o email fornecido é válido usando uma expressão regular.
      * @param email Endereço de email a ser verificado.
-     * @return True se o email for válido, False caso contrário.
+     * @return `true` se o email for válido, `false` caso contrário.
      */
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()

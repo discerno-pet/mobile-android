@@ -7,6 +7,16 @@
     android:background="@drawable/signin_screen"
     tools:context=".SignInActivity">
 
+    <TextView
+        android:id="@+id/errorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="300dp"
+        android:textColor="@color/red"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/emailLayout"
@@ -14,13 +24,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="350dp"
+        android:layout_marginTop="16dp"
         app:boxStrokeColor="@color/yellow"
         app:hintTextColor="@color/yellow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/errorTextView">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/emailEt"
@@ -74,8 +84,8 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
         android:text="Sem registro ainda? Cadastre-se!"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
