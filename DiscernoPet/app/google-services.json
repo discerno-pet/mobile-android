@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "315557057127",
+    "project_id": "db-mobile-discerno-pet",
+    "storage_bucket": "db-mobile-discerno-pet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315557057127:android:ae9dbcf73164803da5fac2",
+        "android_client_info": {
+          "package_name": "com.mobile.discernopet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM0ROk8KCNWBMCMOigK1KQfx1R8DnyUcw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
