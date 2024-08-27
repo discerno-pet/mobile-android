@@ -48,7 +48,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,15 +67,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.NavController
 import com.mobile.discernopet.AuthState
 import com.mobile.discernopet.AuthViewModel
 import com.mobile.discernopet.R
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "login_preferences")
 
@@ -343,7 +344,8 @@ fun LoginPage(
                     context.dataStore.edit { preferences ->
                         if (checkRememberButton) {
                             preferences[usernameKey] = username
-                            preferences[passwordKey] = password //Lembre-se de criptografar a senha adequadamente antes de armazená-la
+                            preferences[passwordKey] =
+                                password //Lembre-se de criptografar a senha adequadamente antes de armazená-la
                         } else {
                             preferences.remove(usernameKey)
                             preferences.remove(passwordKey)
