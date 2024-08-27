@@ -108,7 +108,7 @@ fun LoginPage(
     var checkRememberButton by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    //Lê as preferências ao iniciar
+    // Lê as preferências ao iniciar
     LaunchedEffect(Unit) {
         context.dataStore.data.collect { preferences ->
             checkRememberButton = preferences[rememberMeKey] ?: false
@@ -384,16 +384,18 @@ fun LoginPage(
                 .fillMaxWidth()
                 .wrapContentSize(align = Alignment.BottomCenter)
         ) {
-            // Botão "Criar Conta"
+
             Button(
-                onClick = { /* Lógica para o clique do botão "Entrar com Google" */ },
+                onClick = {
+                    navController.navigate("signup") // Navega para a rota "signup"
+                },
                 modifier = Modifier
                     .fillMaxWidth(larguraBotaoEntrar)
-                    .clip(RoundedCornerShape(0.dp)) // Arredondamento dos cantos
+                    .clip(RoundedCornerShape(0.dp))
                     .border(
-                        width = 1.dp, // Espessura da borda
-                        color = Color.White, // Cor da borda
-                        shape = RoundedCornerShape(22.dp) // Arredondamento da borda (opcional)
+                        width = 1.dp,
+                        color = Color.White,
+                        shape = RoundedCornerShape(22.dp)
                     ),
                 shape = RoundedCornerShape(22.dp),
                 colors = ButtonDefaults.buttonColors(

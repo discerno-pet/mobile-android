@@ -20,6 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.mobile.discernopet.AuthState
 import com.mobile.discernopet.AuthViewModel
 import com.mobile.discernopet.R
 
@@ -40,6 +46,24 @@ fun HomeScreen(
     navController: NavController,
     authViewModel: AuthViewModel
 ) {
+
+    val authState = authViewModel.authState.observeAsState()
+    var userName by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
+
+    // Observa o estado de autenticação
+    authState.value?.let { state ->
+        when (state) {
+            is AuthState.Authenticated -> {
+                // Recupera informações do usuário
+                userName = state.user?.displayName ?: ""
+                userEmail = state.user?.email ?: ""
+            }
+
+            else -> {} // Outros estados (não autenticado, erro, etc.)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,9 +105,9 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Informações fictícias do perfil do usuário
-        ProfileInfo(label = "Nome", info = "Usuário Exemplo")
-        ProfileInfo(label = "Email", info = "usuario@exemplo.com")
+        // Exibe as informações
+        ProfileInfo(label = "Nome", info = userName)
+        ProfileInfo(label = "Email", info = userEmail)
 
         Spacer(modifier = Modifier.height(32.dp))
 
