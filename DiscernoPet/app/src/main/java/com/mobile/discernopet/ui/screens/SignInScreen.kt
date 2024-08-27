@@ -1,5 +1,6 @@
 package com.mobile.discernopet.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -40,15 +42,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -63,8 +69,16 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.mobile.discernopet.AuthState
 import com.mobile.discernopet.AuthViewModel
 import com.mobile.discernopet.R
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "login_preferences")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,15 +98,60 @@ fun LoginPage(
     val alturaInputField = 56.dp
     val larguraBotaoEntrar = 0.96f
 
+    val context = LocalContext.current
+    val rememberMeKey = booleanPreferencesKey("remember_me")
+    val usernameKey = stringPreferencesKey("username")
+    val passwordKey = stringPreferencesKey("password")
+
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var checkRememberButton by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    //Lê as preferências ao iniciar
+    LaunchedEffect(Unit) {
+        context.dataStore.data.collect { preferences ->
+            checkRememberButton = preferences[rememberMeKey] ?: false
+            username = preferences[usernameKey] ?: ""
+            password = preferences[passwordKey] ?: ""
+        }
+    }
+
+    val authState = authViewModel.authState.observeAsState()
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+
+    // Observando o estado de autenticação
+    val currentState = authState.value
+    if (currentState is AuthState.Authenticated && currentState.user != null) {
+        // Se autenticado, navega para a tela "home"
+        LaunchedEffect(Unit) {
+            navController.navigate("home")
+        }
+    }
+
+    // Exibir caixa de diálogo de erro se necessário
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text("Erro de Login") },
+            text = { Text(errorMessage) },
+            confirmButton = {
+                Button(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val (username, setUsername) = rememberSaveable { mutableStateOf("") }
-        val (password, setPassword) = rememberSaveable { mutableStateOf("") }
+
         var passwordVisible by remember { mutableStateOf(false) }
-        var checkRememberButton by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
@@ -134,7 +193,7 @@ fun LoginPage(
         ) {
             TextField(
                 value = username,
-                onValueChange = setUsername,
+                onValueChange = { newValue -> username = newValue },
                 label = { Text("Usuário") },
                 leadingIcon = {
                     Icon(
@@ -167,7 +226,7 @@ fun LoginPage(
         ) {
             TextField(
                 value = password,
-                onValueChange = setPassword,
+                onValueChange = { newValue -> password = newValue },
                 label = { Text("Senha") },
 
                 leadingIcon = {
@@ -220,7 +279,14 @@ fun LoginPage(
                     modifier = Modifier
                         .padding(10.dp, 12.dp, 10.dp, 10.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .clickable { checkRememberButton = !checkRememberButton }
+                        .clickable {
+                            checkRememberButton = !checkRememberButton
+                            coroutineScope.launch {
+                                context.dataStore.edit { preferences ->
+                                    preferences[rememberMeKey] = checkRememberButton
+                                }
+                            }
+                        }
                 ) {
                     Icon(
                         imageVector = if (checkRememberButton) Icons.Filled.CheckCircle else Icons.Filled.CheckCircleOutline,
@@ -266,7 +332,25 @@ fun LoginPage(
         }
         Spacer(Modifier.height(4.dp))
         Button(
-            onClick = { /* Lógica para o clique do botão "Entrar com Google" */ },
+            onClick = {
+                if (username.isBlank() || password.isBlank()) {
+                    errorMessage = "Por favor, preencha todos os campos."
+                    showErrorDialog = true
+                    return@Button
+                }
+                authViewModel.login(username, password)
+                coroutineScope.launch {
+                    context.dataStore.edit { preferences ->
+                        if (checkRememberButton) {
+                            preferences[usernameKey] = username
+                            preferences[passwordKey] = password //Lembre-se de criptografar a senha adequadamente antes de armazená-la
+                        } else {
+                            preferences.remove(usernameKey)
+                            preferences.remove(passwordKey)
+                        }
+                    }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth(larguraBotaoEntrar)
                 .clip(RoundedCornerShape(0.dp)) // Arredondamento dos cantos
@@ -370,19 +454,6 @@ fun LoginPage(
         }
         Spacer(Modifier.height(16.dp))
         Spacer(Modifier.height(relativePosition))
-//        AlternativeLoginOptions(
-//            onIconClick = { index ->
-//                when (index) {
-//                    0 -> Toast.makeText(context, "Google Login Click", Toast.LENGTH_SHORT).show()
-//                    1 -> Toast.makeText(context, "Instagram Login Click", Toast.LENGTH_SHORT).show()
-//                    2 -> Toast.makeText(context, "Github Login Click", Toast.LENGTH_SHORT).show()
-//                }
-//            },
-//            onSignUpClick = onSignUpClick,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .wrapContentSize(align = Alignment.BottomCenter)
-//        )
         LegalNotice(modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(20.dp))
     }

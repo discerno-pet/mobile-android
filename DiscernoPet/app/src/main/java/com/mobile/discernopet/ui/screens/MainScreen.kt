@@ -119,7 +119,10 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = { }) {
+        TextButton(onClick = {
+            authViewModel.signOut() // Chama a função de logout na ViewModel
+            navController.navigate("login") // Navega para a tela de login
+        }) {
             Text("Sair")
         }
     }

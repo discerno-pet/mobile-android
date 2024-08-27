@@ -1,5 +1,6 @@
 package com.mobile.discernopet.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +27,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.mobile.discernopet.AuthState
 import com.mobile.discernopet.AuthViewModel
 import com.mobile.discernopet.R
 
@@ -38,19 +41,33 @@ fun SignUpPage(
     val buttonWidth = 0.96f
     val distanceBetweenFields = 8.dp
 
+    val (name, setName) = rememberSaveable { mutableStateOf("") }
+    val (phone, setPhone) = rememberSaveable { mutableStateOf("") }
+    val (email, setEmail) = rememberSaveable { mutableStateOf("") }
+    val (password, setPassword) = rememberSaveable { mutableStateOf("") }
+    val (confirmPassword, setConfirmPassword) = rememberSaveable { mutableStateOf("") }
+
+    val authState = authViewModel.authState.observeAsState()
+
+    // Verifica o estado de autenticação
+    val currentState = authState.value // Variável temporária
+    if (currentState is AuthState.Authenticated && currentState.user != null) {
+        // Agora o smart cast funciona!
+        Log.d("SignUpPage", "Usuário autenticado: ${currentState.user.email}")
+
+        // Redireciona para a tela "home"
+        LaunchedEffect(Unit) {
+            navController.navigate("home")
+        }
+    }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(20.dp))
-
     ) {
-        val (name, setName) = rememberSaveable { mutableStateOf("") }
-        val (phone, setPhone) = rememberSaveable { mutableStateOf("") }
-        val (email, setEmail) = rememberSaveable { mutableStateOf("") }
-        val (password, setPassword) = rememberSaveable { mutableStateOf("") }
-        val (confirmPassword, setConfirmPassword) = rememberSaveable { mutableStateOf("") }
+
         var passwordVisible by remember { mutableStateOf(false) }
         var confirmPasswordVisible by remember { mutableStateOf(false) }
 
@@ -118,7 +135,15 @@ fun SignUpPage(
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { },
+            onClick = {
+                authViewModel.signUp(
+                    email = email,
+                    password = password,
+                    name = name,
+                    phone = phone
+                )
+                Log.d("SignUpPage", "Button clicked and signUp function called")
+            },
             modifier = Modifier
                 .fillMaxWidth(buttonWidth)
                 .clip(RoundedCornerShape(0.dp))
@@ -147,12 +172,11 @@ fun SignUpPage(
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
-        TextButton(onClick = { }) {
+        TextButton(onClick = { navController.navigate("login") }) { // Navegação adicionada aqui
             Text("Já tem Cadastro? Login")
         }
         LegalNotice(modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(20.dp))
-    }
+        Spacer(modifier = Modifier.height(20.dp))    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
