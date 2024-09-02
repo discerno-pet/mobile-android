@@ -66,6 +66,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -75,6 +76,7 @@ import com.mobile.discernopet.R
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -143,6 +145,25 @@ fun LoginPage(
                 }
             }
         )
+    }
+
+    // Observando o estado de autenticação e navegando após o login
+    LaunchedEffect(key1 = authState.value) { // Lança o efeito quando authState.value muda
+        when (val state = authState.value) {
+            is AuthState.Authenticated -> {
+                if (state.user != null) {
+                    navController.navigate("home")
+                }
+            }
+
+            is AuthState.Error -> {
+                // Exibir erro de login
+                errorMessage = state.message
+                showErrorDialog = true
+            }
+
+            else -> {} // Outros estados (Loading, Unauthenticated)
+        }
     }
 
     Column(
@@ -343,7 +364,8 @@ fun LoginPage(
                     context.dataStore.edit { preferences ->
                         if (checkRememberButton) {
                             preferences[usernameKey] = username
-                            preferences[passwordKey] = password //Lembre-se de criptografar a senha adequadamente antes de armazená-la
+                            preferences[passwordKey] =
+                                password //Lembre-se de criptografar a senha adequadamente antes de armazená-la
                         } else {
                             preferences.remove(usernameKey)
                             preferences.remove(passwordKey)
@@ -566,3 +588,4 @@ fun AlternativeLoginOptions(
         }
     }
 }
+
