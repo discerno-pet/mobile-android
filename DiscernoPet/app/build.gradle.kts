@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4") // Ou versão mais recente
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")  // Ou versão mais recente
     implementation("androidx.datastore:datastore-preferences:1.0.0") // Ou a versão mais recente
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.androidx.datastore.core.android)

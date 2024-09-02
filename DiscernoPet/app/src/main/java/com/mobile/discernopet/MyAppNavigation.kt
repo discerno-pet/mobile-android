@@ -14,16 +14,15 @@ import com.mobile.discernopet.ui.screens.SignUpPage
 fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "signup", builder = {
-        composable("signup") {
-            SignUpPage(modifier, navController, authViewModel)
-        }
+    NavHost(navController = navController, startDestination = "login", builder = {
         composable("login") {
             LoginPage(modifier, navController, authViewModel)
         }
+        composable("signup") {
+            SignUpPage(modifier, navController, authViewModel)
+        }
         composable("home") {
             HomeScreen(modifier, navController, authViewModel)
-
         }
     })
 }

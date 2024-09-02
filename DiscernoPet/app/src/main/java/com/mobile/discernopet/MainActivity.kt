@@ -16,12 +16,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val authViewModel : AuthViewModel by viewModels()
+        val authViewModel: AuthViewModel by viewModels()
 
         setContent {
             DiscernoPetTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                        MyAppNavigation(modifier = Modifier.padding(innerPadding), authViewModel)
+                    MyAppNavigation(modifier = Modifier.padding(innerPadding), authViewModel)
                 }
             }
         }
