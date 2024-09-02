@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -143,6 +144,7 @@ fun SignUpPage(
                     phone = phone
                 )
                 Log.d("SignUpPage", "Button clicked and signUp function called")
+                navController.navigate("login")
             },
             modifier = Modifier
                 .fillMaxWidth(buttonWidth)
@@ -283,3 +285,4 @@ fun PasswordInputField(
         )
     }
 }
+

@@ -65,6 +65,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.core.DataStore
@@ -77,6 +78,10 @@ import androidx.navigation.NavController
 import com.mobile.discernopet.AuthState
 import com.mobile.discernopet.AuthViewModel
 import com.mobile.discernopet.R
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "login_preferences")
@@ -144,6 +149,25 @@ fun LoginPage(
                 }
             }
         )
+    }
+
+    // Observando o estado de autenticação e navegando após o login
+    LaunchedEffect(key1 = authState.value) { // Lança o efeito quando authState.value muda
+        when (val state = authState.value) {
+            is AuthState.Authenticated -> {
+                if (state.user != null) {
+                    navController.navigate("home")
+                }
+            }
+
+            is AuthState.Error -> {
+                // Exibir erro de login
+                errorMessage = state.message
+                showErrorDialog = true
+            }
+
+            else -> {} // Outros estados (Loading, Unauthenticated)
+        }
     }
 
     Column(
@@ -568,3 +592,4 @@ fun AlternativeLoginOptions(
         }
     }
 }
+
